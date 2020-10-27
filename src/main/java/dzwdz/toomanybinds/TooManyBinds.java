@@ -5,6 +5,7 @@ import dzwdz.toomanybinds.autocompletion.VanillaKeybindSuggestions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -46,15 +47,19 @@ public class TooManyBinds {
         );
         ClientRegistry.registerKeyBinding(favoriteKey);
 
-        //ClientLifecycleEvents.CLIENT_STARTED.register(t -> LauncherCompletion.loadData()); todo
-        //ClientLifecycleEvents.CLIENT_STOPPING.register(t -> LauncherCompletion.saveData());
+        LauncherCompletion.loadData();
 
         LauncherCompletion.suggestionProviders.add(new VanillaKeybindSuggestions());
     }
 
     @SubscribeEvent
-    public static void onEvent(InputEvent.KeyInputEvent event) {
+    public static void keyInputEvent(InputEvent.KeyInputEvent event) {
         if (launcherKey.consumeClick())
             Minecraft.getInstance().setScreen(new LauncherScreen());
+    }
+
+    @SubscribeEvent
+    public static void logout(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        LauncherCompletion.saveData(); // todo, this might not be the correct event
     }
 }

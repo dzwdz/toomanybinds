@@ -76,6 +76,7 @@ public class LauncherCompletion {
         } else {
             favorites.remove(bs.getId());
         }
+        saveData();
     }
 
     public static void addToHistory(String string) {

@@ -28,6 +28,8 @@ public class LauncherScreen extends Screen {
     public int w = 250;
     public int lineHeight = 12;
 
+    private boolean firstChar = true;
+
     protected LauncherScreen() {
         super(NarratorChatListener.NO_TITLE);
         completion = new LauncherCompletion();
@@ -99,7 +101,7 @@ public class LauncherScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) { // fixme - the textfield gets the key used to open the menu
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (TooManyBinds.favoriteKey.matches(keyCode, scanCode)) {
             List<BindSuggestion> suggestions = completion.getSuggestions();
             if (suggestions.size() > selected) {
@@ -142,6 +144,13 @@ public class LauncherScreen extends Screen {
         textField.setBordered(false);
         textField.setResponder(this::textChangeListener);
         textField.setValue(text);
+        textField.setFilter((s) -> {
+            if (firstChar) {
+                firstChar = false;
+                return false;
+            }
+            return true;
+        });
         children.add(textField);
         setInitialFocus(textField);
     }

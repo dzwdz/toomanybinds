@@ -34,6 +34,7 @@ public class BindSuggestion {
         GameSettings options = mc.options;
 
         LauncherCompletion.addToHistory(getId());
+        LauncherCompletion.saveData();
 
         // workarounds for keybinds that are handled in dumb, incompatible ways
         if (bind == options.keyFullscreen) {
