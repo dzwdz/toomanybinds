@@ -1,25 +1,24 @@
 package dzwdz.toomanybinds.autocompletion;
 
-import de.siphalor.amecs.api.PriorityKeyBinding;
 import dzwdz.toomanybinds.mixinterface.KeyBindingMixinterface;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.util.ScreenshotUtils;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.GameSettings;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class BindSuggestion {
-    public Text name;
-    public Text category;
+    public ITextComponent name;
+    public ITextComponent category;
     public KeyBinding bind;
     private String searchable;
     public boolean favorite = false;
 
     public BindSuggestion(KeyBinding bind) {
         this.bind = bind;
-        name = new TranslatableText(bind.getTranslationKey());
-        category = new TranslatableText(bind.getCategory());
+        name = new TranslationTextComponent(bind.getName());
+        category = new TranslationTextComponent(bind.getCategory());
         searchable = (name.getString() + " " + category.getString()).toLowerCase();
     }
 
@@ -31,32 +30,28 @@ public class BindSuggestion {
     }
 
     public void execute() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        GameOptions options = mc.options;
+        Minecraft mc = Minecraft.getInstance();
+        GameSettings options = mc.options;
 
         LauncherCompletion.addToHistory(getId());
 
         // workarounds for keybinds that are handled in dumb, incompatible ways
         if (bind == options.keyFullscreen) {
-            mc.getWindow().toggleFullscreen();
+            mc.getWindow().toggleFullScreen();
             mc.options.fullscreen = mc.getWindow().isFullscreen();
-            mc.options.write();
+            mc.options.save();
         } else if (bind == options.keyScreenshot) {
-            ScreenshotUtils.saveScreenshot(mc.runDirectory, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), mc.getFramebuffer(), (text) -> {
+            ScreenShotHelper.grab(mc.gameDirectory, mc.getWindow().getScreenWidth(), mc.getWindow().getScreenHeight(), mc.getMainRenderTarget(), (text) -> {
                 mc.execute(() -> {
-                    mc.inGameHud.getChatHud().addMessage(text);
+                    mc.gui.getChat().addMessage(text);
                 });
             });
         } else {
-            ((KeyBindingMixinterface) bind).toomanybinds$press();
-            // amecs compat
-            bind.setPressed(true);
-            bind.setPressed(false);
-            if (bind instanceof PriorityKeyBinding) ((PriorityKeyBinding)bind).onPressedPriority();
+            ((KeyBindingMixinterface) bind).toomanybinds$press(); // todo this probably isn't compatible with like 90% of forge mods
         }
     }
 
     public String getId() {
-        return bind.getTranslationKey();
+        return bind.getName();
     }
 }

@@ -1,8 +1,8 @@
 package dzwdz.toomanybinds.autocompletion;
 
 import dzwdz.toomanybinds.TooManyBinds;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,8 +32,8 @@ public class VanillaKeybindSuggestions implements SuggestionProvider {
     ));
 
     public void addEntries(List<BindSuggestion> binds) {
-        for (KeyBinding bind : MinecraftClient.getInstance().options.keysAll) {
-            if ((bind.isUnbound() || !TooManyBinds.config.hideBoundKeys) && !blacklist.contains(bind.getTranslationKey()))
+        for (KeyBinding bind : Minecraft.getInstance().options.keyMappings) {
+            if ((bind.isUnbound() || !TooManyBinds.config.hideBoundKeys) && !blacklist.contains(bind.getName()))
                 binds.add(new BindSuggestion(bind));
         }
     }

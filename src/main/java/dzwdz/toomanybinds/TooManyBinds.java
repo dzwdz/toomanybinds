@@ -2,47 +2,59 @@ package dzwdz.toomanybinds;
 
 import dzwdz.toomanybinds.autocompletion.LauncherCompletion;
 import dzwdz.toomanybinds.autocompletion.VanillaKeybindSuggestions;
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-public class TooManyBinds implements ModInitializer {
+@Mod(TooManyBinds.MODID)
+@Mod.EventBusSubscriber(Dist.CLIENT)
+public class TooManyBinds {
+    public static final String MODID = "toomanybinds";
+
     public static ModConfig config;
 
     public static KeyBinding launcherKey;
     public static KeyBinding favoriteKey;
 
-    @Override
-    public void onInitialize() {
-        AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
-        config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+    public TooManyBinds() {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::onClientInitialize);
+    }
 
-        launcherKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+    public void onClientInitialize() {
+        //AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new); todo
+        //config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        config = new ModConfig();
+
+        launcherKey = new KeyBinding(
                 "key.toomanybinds.launcher",
-                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 "category.toomanybinds"
-        ));
-        favoriteKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        );
+        ClientRegistry.registerKeyBinding(launcherKey);
+        favoriteKey = new KeyBinding(
                 "key.toomanybinds.favorite",
-                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_F4,
                 "category.toomanybinds"
-        ));
+        );
+        ClientRegistry.registerKeyBinding(favoriteKey);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (launcherKey.wasPressed()) client.openScreen(new LauncherScreen());
-        });
-
-        ClientLifecycleEvents.CLIENT_STARTED.register(t -> LauncherCompletion.loadData());
-        ClientLifecycleEvents.CLIENT_STOPPING.register(t -> LauncherCompletion.saveData());
+        //ClientLifecycleEvents.CLIENT_STARTED.register(t -> LauncherCompletion.loadData()); todo
+        //ClientLifecycleEvents.CLIENT_STOPPING.register(t -> LauncherCompletion.saveData());
 
         LauncherCompletion.suggestionProviders.add(new VanillaKeybindSuggestions());
+    }
+
+    @SubscribeEvent
+    public static void onEvent(InputEvent.KeyInputEvent event) {
+        if (launcherKey.consumeClick())
+            Minecraft.getInstance().setScreen(new LauncherScreen());
     }
 }

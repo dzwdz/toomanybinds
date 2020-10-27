@@ -3,7 +3,7 @@ package dzwdz.toomanybinds.autocompletion;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -84,7 +84,7 @@ public class LauncherCompletion {
     }
 
     private static File getFile(String suffix) {
-        return new File(MinecraftClient.getInstance().runDirectory, "toomanybinds_" + suffix + ".txt");
+        return new File(Minecraft.getInstance().gameDirectory, "toomanybinds_" + suffix + ".txt");
     }
 
     public static void loadData() {

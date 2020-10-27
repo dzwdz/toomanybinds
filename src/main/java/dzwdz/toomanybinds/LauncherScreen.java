@@ -1,14 +1,12 @@
 package dzwdz.toomanybinds;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import dzwdz.toomanybinds.autocompletion.BindSuggestion;
 import dzwdz.toomanybinds.autocompletion.LauncherCompletion;
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.ConfigManager;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -31,7 +29,7 @@ public class LauncherScreen extends Screen {
     public int lineHeight = 12;
 
     protected LauncherScreen() {
-        super(NarratorManager.EMPTY);
+        super(NarratorChatListener.NO_TITLE);
         completion = new LauncherCompletion();
         completion.updateSuggestions("");
         offsetX = TooManyBinds.config.launcherX;
@@ -62,7 +60,7 @@ public class LauncherScreen extends Screen {
         int lineAmt = Math.min(suggestions.size(), TooManyBinds.config.maxSuggestions);
         int bgColor = (int)Math.round(TooManyBinds.config.bgOpacity * 255) * 0x1000000;
         fill(matrices, getX()-1, getY()-1, getX()+w-1, getY()+lineHeight-2 + lineAmt*lineHeight, bgColor);
-        textField.setSelected(true);
+        textField.setFocus(true);
         textField.render(matrices, mouseX, mouseY, delta);
 
         int y = getY();
@@ -77,11 +75,11 @@ public class LauncherScreen extends Screen {
             }
 
             // draw the bind name
-            drawTextWithShadow(matrices, textRenderer, sg.name, getX(), y, i == selected ? HIGHLIGHT_COLOR : SUGGESTION_COLOR);
+            drawString(matrices, font, sg.name, getX(), y, i == selected ? HIGHLIGHT_COLOR : SUGGESTION_COLOR);
 
             // draw the bind category
-            int textWidth = textRenderer.getWidth(sg.category)+2;
-            drawTextWithShadow(matrices, textRenderer, sg.category, getX()+w-textWidth, y, SUGGESTION_COLOR);
+            int textWidth = font.width(sg.category)+2;
+            drawString(matrices, font, sg.category, getX()+w-textWidth, y, SUGGESTION_COLOR);
         }
 
         super.render(matrices, mouseX, mouseY, delta);
@@ -101,8 +99,8 @@ public class LauncherScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (TooManyBinds.favoriteKey.matchesKey(keyCode, scanCode)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) { // fixme - the textfield gets the key used to open the menu
+        if (TooManyBinds.favoriteKey.matches(keyCode, scanCode)) {
             List<BindSuggestion> suggestions = completion.getSuggestions();
             if (suggestions.size() > selected) {
                 LauncherCompletion.toggleFavorite(suggestions.get(selected));
@@ -116,7 +114,7 @@ public class LauncherScreen extends Screen {
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             List<BindSuggestion> suggestions = completion.getSuggestions();
-            client.openScreen(null);
+            minecraft.setScreen(null);
             if (suggestions.size() > selected)
                 suggestions.get(selected).execute();
             return true;
@@ -137,13 +135,13 @@ public class LauncherScreen extends Screen {
         baseX = (width - w) / 2;
         baseY = (height - lineHeight) / 2;
 
-        client.keyboard.setRepeatEvents(true);
+        minecraft.keyboardHandler.setSendRepeatsToGui(true);
         String text = "";
-        if (textField != null) text = textField.getText();
-        textField = new TextFieldWidget(textRenderer, getX(), getY()+1, w, lineHeight, NarratorManager.EMPTY);
-        textField.setHasBorder(false);
-        textField.setChangedListener(this::textChangeListener);
-        textField.setText(text);
+        if (textField != null) text = textField.getValue();
+        textField = new TextFieldWidget(font, getX(), getY()+1, w, lineHeight, NarratorChatListener.NO_TITLE);
+        textField.setBordered(false);
+        textField.setResponder(this::textChangeListener);
+        textField.setValue(text);
         children.add(textField);
         setInitialFocus(textField);
     }
@@ -154,7 +152,7 @@ public class LauncherScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int width, int height) {
+    public void resize(Minecraft client, int width, int height) {
         init(client, width, height);
     }
 
@@ -165,10 +163,10 @@ public class LauncherScreen extends Screen {
 
     @Override
     public void removed() {
-        client.keyboard.setRepeatEvents(false);
+        minecraft.keyboardHandler.setSendRepeatsToGui(false);
         TooManyBinds.config.launcherX = offsetX;
         TooManyBinds.config.launcherY = offsetY;
-        ((ConfigManager<ModConfig>)AutoConfig.getConfigHolder(ModConfig.class)).save();
+        //((ConfigManager<ModConfig>)AutoConfig.getConfigHolder(ModConfig.class)).save(); todo
     }
 
     @Override
