@@ -1,0 +1,10 @@
+{
+  "category.toomanybinds": "Too Many Binds (Çok Fazla Kısayol)",
+  "key.toomanybinds.launcher": "Kısayol Başlatıcısı",
+  "key.toomanybinds.favorite": "Kısayolu favori olarak işaretle",
+
+  "text.autoconfig.toomanybinds.title": "Too Many Binds (Çok Fazla Kısayol)",
+  "text.autoconfig.toomanybinds.option.hideBoundKeys": "Sadece tuş atanmamış kısayolları göster",
+  "text.autoconfig.toomanybinds.option.maxSuggestions": "Maksimum öneri sayısı",
+  "text.autoconfig.toomanybinds.option.bgOpacity": "Arkaplan opaklığı"
+}
