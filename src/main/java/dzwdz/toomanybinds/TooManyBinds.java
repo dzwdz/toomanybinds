@@ -2,13 +2,13 @@ package dzwdz.toomanybinds;
 
 import dzwdz.toomanybinds.autocompletion.LauncherCompletion;
 import dzwdz.toomanybinds.autocompletion.VanillaKeybindSuggestions;
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
@@ -37,7 +37,7 @@ public class TooManyBinds implements ModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (launcherKey.wasPressed()) client.openScreen(new LauncherScreen());
+            if (launcherKey.wasPressed()) client.setScreen(new LauncherScreen());
         });
 
         ClientLifecycleEvents.CLIENT_STARTED.register(t -> LauncherCompletion.loadData());

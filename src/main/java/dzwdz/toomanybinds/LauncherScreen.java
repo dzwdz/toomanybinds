@@ -2,8 +2,8 @@ package dzwdz.toomanybinds;
 
 import dzwdz.toomanybinds.autocompletion.BindSuggestion;
 import dzwdz.toomanybinds.autocompletion.LauncherCompletion;
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.ConfigManager;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.ConfigManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -62,7 +62,7 @@ public class LauncherScreen extends Screen {
         int lineAmt = Math.min(suggestions.size(), TooManyBinds.config.maxSuggestions);
         int bgColor = (int)Math.round(TooManyBinds.config.bgOpacity * 255) * 0x1000000;
         fill(matrices, getX()-1, getY()-1, getX()+w-1, getY()+lineHeight-2 + lineAmt*lineHeight, bgColor);
-        textField.setSelected(true);
+        textField.setTextFieldFocused(true);
         textField.render(matrices, mouseX, mouseY, delta);
 
         int y = getY();
@@ -116,7 +116,7 @@ public class LauncherScreen extends Screen {
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             List<BindSuggestion> suggestions = completion.getSuggestions();
-            client.openScreen(null);
+            client.setScreen(null);
             if (suggestions.size() > selected)
                 suggestions.get(selected).execute();
             return true;
@@ -141,10 +141,10 @@ public class LauncherScreen extends Screen {
         String text = "";
         if (textField != null) text = textField.getText();
         textField = new TextFieldWidget(textRenderer, getX(), getY()+1, w, lineHeight, NarratorManager.EMPTY);
-        textField.setHasBorder(false);
+        textField.setDrawsBackground(false);
         textField.setChangedListener(this::textChangeListener);
         textField.setText(text);
-        children.add(textField);
+        addSelectableChild(textField);
         setInitialFocus(textField);
     }
 
@@ -168,7 +168,7 @@ public class LauncherScreen extends Screen {
         client.keyboard.setRepeatEvents(false);
         TooManyBinds.config.launcherX = offsetX;
         TooManyBinds.config.launcherY = offsetY;
-        ((ConfigManager<ModConfig>)AutoConfig.getConfigHolder(ModConfig.class)).save();
+        ((ConfigManager<ModConfig>) AutoConfig.getConfigHolder(ModConfig.class)).save();
     }
 
     @Override
